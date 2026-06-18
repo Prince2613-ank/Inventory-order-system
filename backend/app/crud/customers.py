@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException, status
@@ -12,8 +12,14 @@ def get_customer(db: Session, customer_id: int) -> models.Customer:
     return customer
 
 
-def get_customers(db: Session) -> List[models.Customer]:
-    return db.query(models.Customer).order_by(models.Customer.id).all()
+def get_customers(db: Session, search: Optional[str] = None) -> List[models.Customer]:
+    query = db.query(models.Customer)
+    if search and search.strip():
+        term = f"%{search.strip()}%"
+        query = query.filter(
+            models.Customer.full_name.ilike(term) | models.Customer.email.ilike(term)
+        )
+    return query.order_by(models.Customer.id).all()
 
 
 def create_customer(db: Session, payload: schemas.CustomerCreate) -> models.Customer:

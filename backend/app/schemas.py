@@ -2,7 +2,7 @@ import re
 from decimal import Decimal
 from datetime import datetime
 from typing import List, Optional
-from pydantic import BaseModel, EmailStr, field_validator, model_validator
+from pydantic import BaseModel, EmailStr, field_validator
 
 
 # ---------------------------------------------------------------------------
@@ -95,6 +95,12 @@ class ProductResponse(ProductBase):
     updated_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class BulkProductResult(BaseModel):
+    created: int
+    failed: int
+    errors: List[str]
 
 
 # ---------------------------------------------------------------------------
@@ -192,11 +198,21 @@ class OrderResponse(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# Dashboard schema
+# Dashboard schemas
 # ---------------------------------------------------------------------------
+
+class RecentOrderSummary(BaseModel):
+    id: int
+    customer_name: str
+    total_amount: Decimal
+    items_count: int
+    created_at: datetime
+
 
 class DashboardResponse(BaseModel):
     total_products: int
     total_customers: int
     total_orders: int
+    total_revenue: Decimal
     low_stock_products: List[ProductResponse]
+    recent_orders: List[RecentOrderSummary]

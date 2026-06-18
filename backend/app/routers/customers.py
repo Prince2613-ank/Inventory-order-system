@@ -1,5 +1,5 @@
-from typing import List
-from fastapi import APIRouter, Depends, status
+from typing import List, Optional
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..crud import customers as crud
@@ -9,8 +9,11 @@ router = APIRouter(prefix="/customers", tags=["Customers"])
 
 
 @router.get("", response_model=List[schemas.CustomerResponse])
-def list_customers(db: Session = Depends(get_db)):
-    return crud.get_customers(db)
+def list_customers(
+    search: Optional[str] = Query(None, description="Filter by name or email (case-insensitive)"),
+    db: Session = Depends(get_db),
+):
+    return crud.get_customers(db, search=search)
 
 
 @router.get("/{customer_id}", response_model=schemas.CustomerResponse)
