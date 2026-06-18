@@ -36,6 +36,16 @@ app = FastAPI(
 _raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:80,http://localhost")
 allowed_origins = [o.strip() for o in _raw_origins.split(",") if o.strip()]
 
+print("ALLOWED_ORIGINS ENV =", os.getenv("ALLOWED_ORIGINS"))
+print("PARSED ORIGINS =", allowed_origins)
+
+@app.get("/env-test")
+def env_test():
+    return {
+        "raw": os.getenv("ALLOWED_ORIGINS"),
+        "parsed": allowed_origins
+    }
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
