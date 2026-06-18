@@ -1,49 +1,57 @@
 # Inventory & Order Management System
 
-A full-stack web application for managing products, customers, and orders with real-time inventory tracking.
+A production-ready full-stack web application for managing products, customers, and orders with real-time inventory tracking.
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| Backend | Python 3.11, FastAPI, SQLAlchemy 2.x |
-| Frontend | React 18, React Router v6, Axios |
+| Backend | Python 3.11, FastAPI 0.111, SQLAlchemy 2.x |
 | Database | PostgreSQL 16 |
-| Containerization | Docker, Docker Compose |
+| Frontend | React 18, React Router v6, Axios |
+| Containerization | Docker (multi-stage builds), Docker Compose |
+| Web Server | nginx (serves React production build) |
+
+---
 
 ## Running Locally with Docker Compose (Recommended)
 
-### Prerequisites
-- Docker Desktop installed and running
+**Prerequisites:** Docker Desktop installed and running.
 
-### Steps
+### 1. Clone and configure
 
-1. **Clone the repo and create your `.env` file:**
-   ```bash
-   git clone <repo-url>
-   cd inventory-order-system
-   cp .env.example .env
-   ```
+```bash
+git clone <repo-url>
+cd inventory-order-system
+cp .env.example .env
+```
 
-2. **Edit `.env`** — set a real `POSTGRES_PASSWORD`:
-   ```
-   POSTGRES_DB=inventory_db
-   POSTGRES_USER=postgres
-   POSTGRES_PASSWORD=your_strong_password_here
-   ALLOWED_ORIGINS=http://localhost:3000,http://localhost,http://localhost:80
-   ```
+Edit `.env` and set a strong `POSTGRES_PASSWORD`:
 
-3. **Start all services:**
-   ```bash
-   docker-compose up --build
-   ```
+```env
+POSTGRES_DB=inventory_db
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=your_strong_password_here
+ALLOWED_ORIGINS=http://localhost:3000,http://localhost,http://localhost:80
+```
 
-4. **Access the app:**
-   - Frontend: http://localhost
-   - Backend API docs: http://localhost:8000/docs
-   - Backend health: http://localhost:8000/health
+### 2. Start all three services
 
-> The backend waits for Postgres to be fully ready (healthcheck polling) before starting, so you won't see connection errors on first boot.
+```bash
+docker-compose up --build
+```
+
+### 3. Access the application
+
+| Service | URL |
+|---------|-----|
+| Frontend | http://localhost |
+| Backend API docs (Swagger) | http://localhost:8000/docs |
+| Backend health check | http://localhost:8000/health |
+
+> The backend waits for PostgreSQL to be **fully ready** (via `pg_isready` healthcheck) before starting — no manual retry needed.
+
+---
 
 ## Running Without Docker (Local Dev)
 
@@ -52,114 +60,192 @@ A full-stack web application for managing products, customers, and orders with r
 ```bash
 cd backend
 python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
+# Windows:
+.venv\Scripts\activate
+# macOS/Linux:
+source .venv/bin/activate
+
 pip install -r requirements.txt
 
-# Create a .env file in backend/
+# Create backend/.env
 cp .env.example .env
-# Edit .env — set DATABASE_URL to point to your local Postgres instance
-# e.g. DATABASE_URL=postgresql://postgres:password@localhost:5432/inventory_db
+# Edit DATABASE_URL to point to your local Postgres:
+# DATABASE_URL=postgresql://postgres:password@localhost:5432/inventory_db
 
 uvicorn app.main:app --reload --port 8000
 ```
 
-API docs available at http://localhost:8000/docs
+> `database.py` automatically normalises `postgresql://` → `postgresql+psycopg://` so psycopg3 always connects correctly.
+
+API docs: http://localhost:8000/docs
 
 ### Frontend
 
 ```bash
 cd frontend
 npm install
-# Create .env file:
 echo "REACT_APP_API_URL=http://localhost:8000" > .env
 npm start
 ```
 
-Frontend available at http://localhost:3000
+Frontend: http://localhost:3000
+
+---
 
 ## API Endpoint Summary
 
 ### Products
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/products` | List all products |
-| GET | `/products/{id}` | Get product by ID |
-| POST | `/products` | Create product |
-| PUT | `/products/{id}` | Update product |
-| DELETE | `/products/{id}` | Delete product |
+
+| Method | Endpoint | Description | Status |
+|--------|----------|-------------|--------|
+| GET | `/products` | List all products (supports `?search=`) | 200 |
+| GET | `/products/{id}` | Get product by ID | 200 / 404 |
+| POST | `/products` | Create product | 201 / 409 / 422 |
+| POST | `/products/bulk` | Bulk create (atomic) | 201 |
+| PUT | `/products/{id}` | Update product | 200 / 404 / 409 |
+| DELETE | `/products/{id}` | Delete product | 204 / 404 |
 
 ### Customers
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/customers` | List all customers |
-| GET | `/customers/{id}` | Get customer by ID |
-| POST | `/customers` | Create customer |
-| DELETE | `/customers/{id}` | Delete customer |
+
+| Method | Endpoint | Description | Status |
+|--------|----------|-------------|--------|
+| GET | `/customers` | List all customers (supports `?search=`) | 200 |
+| GET | `/customers/{id}` | Get customer by ID | 200 / 404 |
+| POST | `/customers` | Create customer | 201 / 409 / 422 |
+| DELETE | `/customers/{id}` | Delete customer | 204 / 404 |
 
 ### Orders
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/orders` | List all orders |
-| GET | `/orders/{id}` | Get order with full item details |
-| POST | `/orders` | Create order (reduces stock atomically) |
-| DELETE | `/orders/{id}` | Cancel order (restores stock) |
+
+| Method | Endpoint | Description | Status |
+|--------|----------|-------------|--------|
+| GET | `/orders` | List all orders (with items) | 200 |
+| GET | `/orders/{id}` | Get order with full item details | 200 / 404 |
+| POST | `/orders` | Create order (reduces stock atomically) | 201 / 400 / 404 |
+| DELETE | `/orders/{id}` | Cancel order (restores stock) | 204 / 404 |
 
 ### Other
+
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/dashboard` | Summary stats + low-stock products |
-| GET | `/health` | Health check |
+| GET | `/dashboard` | Totals, revenue, low-stock list, recent orders |
+| GET | `/health` | Health check (`{"status":"ok"}`) |
+
+---
+
+## Business Logic Implemented
+
+| Rule | Implementation |
+|------|---------------|
+| Unique SKU | DB `UNIQUE` constraint + 409 response |
+| Unique customer email | DB `UNIQUE` constraint + 409 response |
+| No negative stock | DB `CHECK (quantity_in_stock >= 0)` + Pydantic validator |
+| Insufficient stock → reject order | `SELECT ... FOR UPDATE` inside transaction; entire order rejected if any item fails |
+| Stock reduced on order creation | Atomic deduction inside same transaction |
+| Total calculated server-side | Sum of `unit_price × quantity` per item; client total never trusted |
+| Correct HTTP status codes | 201 Created, 204 No Content, 404 Not Found, 409 Conflict, 422 Unprocessable |
+
+---
+
+## Docker Architecture
+
+```
+docker-compose up
+├── db          postgres:16-alpine     port 5432 (internal)
+├── backend     python:3.11-slim       port 8000 → host 8000
+└── frontend    nginx:1.25-alpine      port 80  → host 80
+```
+
+- **Backend Dockerfile:** `python:3.11-slim`, installs from `requirements.txt`, runs `uvicorn` with 2 workers.
+- **Frontend Dockerfile:** Two-stage — `node:20-alpine` builds React app, `nginx:1.25-alpine` serves static files. nginx proxies `/api/*` → `backend:8000`.
+- **Health check:** `pg_isready` polled every 5 s; backend `depends_on: condition: service_healthy`.
+- **Named volume:** `postgres_data` persists DB across container restarts.
+- **No hardcoded credentials:** All secrets via environment variables; `.env` is gitignored.
+
+---
+
+## Pushing the Backend Image to Docker Hub
+
+The submission form requires a Docker Hub image link. Steps:
+
+```bash
+# 1. Build the image
+docker build -t <your-dockerhub-username>/inventory-backend:latest ./backend
+
+# 2. Log in to Docker Hub
+docker login
+
+# 3. Push
+docker push <your-dockerhub-username>/inventory-backend:latest
+```
+
+Your image will be available at:
+`https://hub.docker.com/r/<your-dockerhub-username>/inventory-backend`
+
+---
+
+## Deployment Guide
+
+### Backend — Railway (recommended: no sleep, built-in Postgres, Docker-native)
+
+1. Push this repo to GitHub.
+2. Create a new Railway project → **Deploy from GitHub**.
+3. Set the root directory to `backend/`.
+4. Add a **Postgres** plugin — Railway auto-populates `DATABASE_URL`.
+5. Set environment variable: `ALLOWED_ORIGINS=https://your-app.vercel.app`
+6. Railway uses `backend/railway.toml` for the build/start command automatically.
+
+### Frontend — Vercel (recommended: zero-config React, fastest CDN)
+
+1. Import the GitHub repo in Vercel.
+2. Set **Root Directory** → `frontend/`.
+3. Set environment variable: `REACT_APP_API_URL=https://your-railway-backend.up.railway.app`
+4. Deploy.
+
+---
 
 ## Design Decisions & Assumptions
 
-### Order supports multiple products
-Orders use an `order_items` junction table, so a single order can contain multiple products with their own quantities. This is the expected behavior for any real inventory system.
+| Decision | Detail |
+|----------|--------|
+| Multi-product orders | `order_items` junction table — one order can contain multiple products |
+| Order cancellation restores stock | `DELETE /orders/{id}` adds quantities back; documented and intentional |
+| Unit price snapshot | `order_items.unit_price` stores price at time of order; historical orders unaffected by price changes |
+| Partial fulfilment | **Not supported** — if any item is understocked the whole order is rejected |
+| Low-stock threshold | `LOW_STOCK_THRESHOLD = 10` in `backend/app/main.py` — single constant to change |
+| psycopg3 URL normalisation | `database.py` converts `postgresql://` → `postgresql+psycopg://` automatically |
+| Frontend search | Client-side filter with 250 ms debounce; backend also accepts `?search=` for API consumers |
+| CSV export | Products, Customers, Orders pages each have an Export CSV button |
 
-### Order cancellation restores stock
-**Assumption made:** Deleting/cancelling an order via `DELETE /orders/{id}` restores all product quantities back to inventory. Rationale: in an inventory system, a cancelled order should free up reserved stock. This is documented behavior, not silent guessing.
+---
 
-### Unit price snapshot
-`order_items.unit_price` stores the product price at the time of the order. This means historical orders are not retroactively affected by future price changes. The `total_amount` on the order is always calculated server-side from the snapshot prices.
+## Project Structure
 
-### Stock is never negative
-Before an order is placed, the system checks that every requested product has sufficient stock. If *any* item in an order is understocked, the **entire order is rejected** — no partial fulfillment. This check happens inside a `SELECT ... FOR UPDATE` transaction to prevent race conditions under concurrent load.
-
-### Low-stock threshold
-Defined as `LOW_STOCK_THRESHOLD = 10` in `backend/app/main.py`. Products with `quantity_in_stock < 10` appear in the dashboard low-stock list. Change this constant to adjust the threshold app-wide.
-
-### Database constraints
-- `products.sku` has a `UNIQUE` constraint at the database level
-- `customers.email` has a `UNIQUE` constraint at the database level
-- `products.price >= 0` and `products.quantity_in_stock >= 0` are enforced as `CHECK` constraints
-- Foreign keys are enforced; order_items cascade-delete when an order is deleted
-
-### CORS
-Allowed origins are set via the `ALLOWED_ORIGINS` environment variable (comma-separated). Never hardcoded.
-
-## Deployment
-
-### Backend — Railway
-Railway offers the best free-tier Docker deployment: no sleep, built-in Postgres add-on, simple env var UI.
-
-1. Push code to GitHub
-2. Create a new Railway project → "Deploy from GitHub repo"
-3. Select the `backend/` directory as the root, or use a railway.toml
-4. Add a Postgres plugin → Railway auto-populates `DATABASE_URL`
-5. Set `ALLOWED_ORIGINS` to your Vercel frontend URL
-
-### Frontend — Vercel
-Vercel offers zero-config React deploys with the fastest global CDN.
-
-1. Import the GitHub repo in Vercel
-2. Set root directory to `frontend/`
-3. Set environment variable: `REACT_APP_API_URL=https://your-railway-backend.up.railway.app`
-4. Deploy
-
-### Environment Variables Summary
-
-**Backend (Railway):**
-- `DATABASE_URL` — set automatically by Railway Postgres plugin
-- `ALLOWED_ORIGINS` — `https://your-app.vercel.app`
-
-**Frontend (Vercel):**
-- `REACT_APP_API_URL` — `https://your-app.up.railway.app`
+```
+inventory-order-system/
+├── backend/
+│   ├── app/
+│   │   ├── main.py          # FastAPI app, CORS, dashboard endpoint
+│   │   ├── models.py        # SQLAlchemy ORM models
+│   │   ├── schemas.py       # Pydantic v2 request/response schemas
+│   │   ├── database.py      # Engine, session, psycopg3 URL normalisation
+│   │   ├── routers/         # products.py, customers.py, orders.py
+│   │   └── crud/            # products.py, customers.py, orders.py
+│   ├── Dockerfile
+│   ├── railway.toml
+│   ├── requirements.txt
+│   └── .env.example
+├── frontend/
+│   ├── src/
+│   │   ├── pages/           # Dashboard, Products, Customers, Orders
+│   │   ├── components/      # Forms, modals, chart, search, sort
+│   │   ├── hooks/           # useDebounce, useSortableData
+│   │   ├── utils/           # exportCsv
+│   │   └── services/        # api.js (Axios)
+│   ├── Dockerfile           # Multi-stage: node build → nginx serve
+│   ├── nginx.conf
+│   ├── vercel.json
+│   └── .env.example
+├── docker-compose.yml
+├── .env.example
+└── .gitignore
+```
