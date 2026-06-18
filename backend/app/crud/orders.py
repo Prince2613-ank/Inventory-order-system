@@ -60,7 +60,6 @@ def get_orders(db: Session) -> List[schemas.OrderResponse]:
 
 
 def create_order(db: Session, payload: schemas.OrderCreate) -> schemas.OrderResponse:
-    # Verify customer exists
     customer = db.query(models.Customer).filter(models.Customer.id == payload.customer_id).first()
     if not customer:
         raise HTTPException(
@@ -68,7 +67,6 @@ def create_order(db: Session, payload: schemas.OrderCreate) -> schemas.OrderResp
             detail=f"Customer {payload.customer_id} not found",
         )
 
-    # Validate no duplicate product IDs in the request
     product_ids = [item.product_id for item in payload.items]
     if len(product_ids) != len(set(product_ids)):
         raise HTTPException(
@@ -76,7 +74,7 @@ def create_order(db: Session, payload: schemas.OrderCreate) -> schemas.OrderResp
             detail="Duplicate product IDs in order items; consolidate quantities instead",
         )
 
-    # Lock product rows for update within this transaction to prevent race conditions
+    # FOR UPDATE locks rows so concurrent orders cannot double-deduct the same stock
     products = (
         db.query(models.Product)
         .filter(models.Product.id.in_(product_ids))
@@ -85,7 +83,6 @@ def create_order(db: Session, payload: schemas.OrderCreate) -> schemas.OrderResp
     )
     product_map = {p.id: p for p in products}
 
-    # Verify all requested products exist
     missing = [pid for pid in product_ids if pid not in product_map]
     if missing:
         raise HTTPException(
@@ -93,7 +90,6 @@ def create_order(db: Session, payload: schemas.OrderCreate) -> schemas.OrderResp
             detail=f"Products not found: {missing}",
         )
 
-    # Check stock sufficiency before touching anything — reject whole order if any item fails
     insufficient = []
     for item in payload.items:
         product = product_map[item.product_id]
@@ -108,7 +104,6 @@ def create_order(db: Session, payload: schemas.OrderCreate) -> schemas.OrderResp
             detail="Insufficient stock: " + "; ".join(insufficient),
         )
 
-    # All checks passed — build order atomically
     total = Decimal("0")
     order_items = []
     for item in payload.items:
@@ -137,10 +132,8 @@ def create_order(db: Session, payload: schemas.OrderCreate) -> schemas.OrderResp
 
 
 def delete_order(db: Session, order_id: int) -> None:
-    """Cancel an order and restore stock to inventory."""
     order = _load_order(db, order_id)
 
-    # Restore stock for each item before deleting
     for item in order.items:
         product = db.query(models.Product).filter(models.Product.id == item.product_id).first()
         if product:

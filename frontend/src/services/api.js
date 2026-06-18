@@ -1,7 +1,6 @@
 import axios from "axios";
 
-// In production: set REACT_APP_API_URL to your backend's public URL (no trailing slash)
-// In Docker Compose local dev: nginx proxies /api/* -> backend:8000, so BASE_URL="/api"
+// nginx proxies /api/* → backend:8000 in Docker; set REACT_APP_API_URL for external deployments
 const BASE_URL = process.env.REACT_APP_API_URL || "/api";
 
 const api = axios.create({
@@ -9,26 +8,22 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-// Products
 export const getProducts = () => api.get("/products").then((r) => r.data);
 export const getProduct = (id) => api.get(`/products/${id}`).then((r) => r.data);
 export const createProduct = (data) => api.post("/products", data).then((r) => r.data);
 export const updateProduct = (id, data) => api.put(`/products/${id}`, data).then((r) => r.data);
 export const deleteProduct = (id) => api.delete(`/products/${id}`);
 
-// Customers
 export const getCustomers = () => api.get("/customers").then((r) => r.data);
 export const getCustomer = (id) => api.get(`/customers/${id}`).then((r) => r.data);
 export const createCustomer = (data) => api.post("/customers", data).then((r) => r.data);
 export const deleteCustomer = (id) => api.delete(`/customers/${id}`);
 
-// Orders
 export const getOrders = () => api.get("/orders").then((r) => r.data);
 export const getOrder = (id) => api.get(`/orders/${id}`).then((r) => r.data);
 export const createOrder = (data) => api.post("/orders", data).then((r) => r.data);
 export const deleteOrder = (id) => api.delete(`/orders/${id}`);
 
-// Dashboard
 export const getDashboard = () => api.get("/dashboard").then((r) => r.data);
 
 export default api;

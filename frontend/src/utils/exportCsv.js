@@ -1,8 +1,3 @@
-/**
- * Converts an array of plain objects to a CSV file and triggers a browser download.
- * @param {string} filename  — e.g. "products-2024-01-01.csv"
- * @param {Object[]} rows    — each object's keys become column headers
- */
 export function exportToCsv(filename, rows) {
   if (!rows || rows.length === 0) return;
   const headers = Object.keys(rows[0]);

@@ -1,6 +1,4 @@
-/* =====================================================
-   DESIGN TOKENS
-   ===================================================== */
+/* DESIGN TOKENS */
 :root {
   --navy-950: #0a0f1e;
   --navy-900: #0f172a;
@@ -46,9 +44,7 @@
   --transition: 0.18s ease;
 }
 
-/* =====================================================
-   RESET & BASE
-   ===================================================== */
+/* RESET & BASE */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -62,9 +58,7 @@ body {
 
 a { color: inherit; text-decoration: none; }
 
-/* =====================================================
-   NAVBAR
-   ===================================================== */
+/* NAVBAR */
 .navbar {
   display: flex;
   align-items: center;
@@ -132,9 +126,7 @@ a { color: inherit; text-decoration: none; }
 
 .nav-icon { font-size: 1rem; }
 
-/* =====================================================
-   LAYOUT
-   ===================================================== */
+/* LAYOUT */
 .main-content {
   max-width: 1140px;
   margin: 0 auto;
@@ -182,9 +174,7 @@ a { color: inherit; text-decoration: none; }
   gap: 0.5rem;
 }
 
-/* =====================================================
-   BUTTONS
-   ===================================================== */
+/* BUTTONS */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -246,9 +236,7 @@ a { color: inherit; text-decoration: none; }
 .btn-sm { padding: 0.35rem 0.8rem; font-size: 0.8rem; }
 .btn-lg { padding: 0.7rem 1.6rem; font-size: 0.95rem; }
 
-/* =====================================================
-   CARDS
-   ===================================================== */
+/* CARDS */
 .card {
   background: #fff;
   border-radius: var(--radius-lg);
@@ -256,9 +244,7 @@ a { color: inherit; text-decoration: none; }
   box-shadow: var(--shadow-sm);
 }
 
-/* =====================================================
-   FORMS
-   ===================================================== */
+/* FORMS */
 .form-card {
   background: #fff;
   border: 1px solid rgba(226,232,240,.8);
@@ -343,9 +329,7 @@ a { color: inherit; text-decoration: none; }
   letter-spacing: 0.05em;
 }
 
-/* =====================================================
-   ORDER FORM SPECIFICS
-   ===================================================== */
+/* ORDER FORM */
 .order-items-container {
   display: flex;
   flex-direction: column;
@@ -387,9 +371,7 @@ a { color: inherit; text-decoration: none; }
   color: var(--indigo-600);
 }
 
-/* =====================================================
-   TABLES
-   ===================================================== */
+/* TABLES */
 .table-wrapper {
   background: #fff;
   border-radius: var(--radius-lg);
@@ -478,9 +460,7 @@ a { color: inherit; text-decoration: none; }
   padding: 0.85rem 1.1rem;
 }
 
-/* =====================================================
-   DASHBOARD
-   ===================================================== */
+/* DASHBOARD */
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -563,9 +543,7 @@ a { color: inherit; text-decoration: none; }
   font-weight: 600;
 }
 
-/* =====================================================
-   BADGES & CHIPS
-   ===================================================== */
+/* BADGES & CHIPS */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -629,9 +607,7 @@ a { color: inherit; text-decoration: none; }
 .status-active { background: var(--emerald-100); color: var(--emerald-600); }
 .status-cancelled { background: var(--rose-100); color: var(--rose-600); }
 
-/* =====================================================
-   EMPTY STATE & LOADING
-   ===================================================== */
+/* EMPTY STATE & LOADING */
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -676,9 +652,7 @@ a { color: inherit; text-decoration: none; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* =====================================================
-   BANNERS
-   ===================================================== */
+/* BANNERS */
 .error-banner {
   display: flex;
   align-items: center;
@@ -692,9 +666,7 @@ a { color: inherit; text-decoration: none; }
   font-weight: 500;
 }
 
-/* =====================================================
-   MODAL
-   ===================================================== */
+/* MODAL */
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -752,9 +724,7 @@ a { color: inherit; text-decoration: none; }
 
 .modal-actions { display: flex; gap: 0.75rem; }
 
-/* =====================================================
-   PRICE & NUMBER DISPLAY
-   ===================================================== */
+/* PRICE & NUMBER DISPLAY */
 .price {
   font-weight: 700;
   color: var(--navy-800);
@@ -767,9 +737,7 @@ a { color: inherit; text-decoration: none; }
   color: var(--indigo-600);
 }
 
-/* =====================================================
-   LOW STOCK WARNING SECTION
-   ===================================================== */
+/* LOW STOCK WARNING */
 .low-stock-header {
   display: flex;
   align-items: center;
@@ -790,18 +758,14 @@ a { color: inherit; text-decoration: none; }
   letter-spacing: 0.04em;
 }
 
-/* =====================================================
-   SECTION DIVIDER
-   ===================================================== */
+/* SECTION DIVIDER */
 .section-divider {
   height: 1px;
   background: linear-gradient(to right, var(--navy-100), transparent);
   margin: 0.25rem 0;
 }
 
-/* =====================================================
-   TABLE FOOTER / COUNT
-   ===================================================== */
+/* TABLE FOOTER */
 .table-footer {
   padding: 0.65rem 1.1rem;
   background: var(--navy-50);
@@ -811,9 +775,7 @@ a { color: inherit; text-decoration: none; }
   font-weight: 500;
 }
 
-/* =====================================================
-   4-COLUMN STAT GRID
-   ===================================================== */
+/* STAT GRID VARIANTS */
 .stat-grid-4 {
   grid-template-columns: repeat(4, 1fr);
 }
@@ -823,9 +785,7 @@ a { color: inherit; text-decoration: none; }
   color: #fff;
 }
 
-/* =====================================================
-   DASHBOARD TWO-COLUMN GRID
-   ===================================================== */
+/* DASHBOARD GRID */
 .dashboard-grid {
   display: grid;
   grid-template-columns: 2fr 1fr;
@@ -836,9 +796,7 @@ a { color: inherit; text-decoration: none; }
   padding: 1.5rem;
 }
 
-/* =====================================================
-   STOCK CHART
-   ===================================================== */
+/* STOCK CHART */
 .stock-chart {
   display: flex;
   flex-direction: column;
@@ -897,9 +855,7 @@ a { color: inherit; text-decoration: none; }
   text-align: right;
 }
 
-/* =====================================================
-   RECENT ORDERS LIST
-   ===================================================== */
+/* RECENT ORDERS LIST */
 .recent-list {
   display: flex;
   flex-direction: column;
@@ -955,9 +911,7 @@ a { color: inherit; text-decoration: none; }
   white-space: nowrap;
 }
 
-/* =====================================================
-   SEARCH BAR
-   ===================================================== */
+/* SEARCH BAR */
 .search-bar-wrapper {
   display: flex;
   align-items: center;
@@ -1019,9 +973,7 @@ a { color: inherit; text-decoration: none; }
   white-space: nowrap;
 }
 
-/* =====================================================
-   SORTABLE TABLE HEADERS
-   ===================================================== */
+/* SORTABLE TABLE HEADERS */
 .sortable-th {
   cursor: pointer;
   user-select: none;
@@ -1041,9 +993,7 @@ a { color: inherit; text-decoration: none; }
 
 .sort-active .sort-icon { opacity: 1; }
 
-/* =====================================================
-   FILTER TABS (Orders status)
-   ===================================================== */
+/* FILTER TABS */
 .filter-tabs {
   display: flex;
   align-items: center;
@@ -1092,9 +1042,7 @@ a { color: inherit; text-decoration: none; }
   color: var(--emerald-600);
 }
 
-/* =====================================================
-   RESPONSIVE
-   ===================================================== */
+/* RESPONSIVE */
 @media (max-width: 1024px) {
   .stat-grid-4 { grid-template-columns: repeat(2, 1fr); }
   .dashboard-grid { grid-template-columns: 1fr; }

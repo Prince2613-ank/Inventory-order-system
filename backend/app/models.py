@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy import (
     Column, Integer, String, Numeric, ForeignKey,
-    DateTime, CheckConstraint, UniqueConstraint, Text
+    DateTime, CheckConstraint, UniqueConstraint, text
 )
 from sqlalchemy.orm import relationship
 from .database import Base
@@ -20,8 +20,8 @@ class Product(Base):
     sku = Column(String(100), nullable=False)
     price = Column(Numeric(10, 2), nullable=False)
     quantity_in_stock = Column(Integer, nullable=False, default=0)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, server_default=text("NOW()"), nullable=False)
+    updated_at = Column(DateTime, server_default=text("NOW()"), onupdate=datetime.utcnow, nullable=False)
 
     order_items = relationship("OrderItem", back_populates="product")
 
@@ -36,7 +36,7 @@ class Customer(Base):
     full_name = Column(String(255), nullable=False)
     email = Column(String(255), nullable=False)
     phone = Column(String(20), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, server_default=text("NOW()"), nullable=False)
 
     orders = relationship("Order", back_populates="customer")
 
@@ -48,7 +48,7 @@ class Order(Base):
     customer_id = Column(Integer, ForeignKey("customers.id"), nullable=False)
     total_amount = Column(Numeric(10, 2), nullable=False)
     status = Column(String(50), nullable=False, default="active")
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, server_default=text("NOW()"), nullable=False)
 
     customer = relationship("Customer", back_populates="orders")
     items = relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")

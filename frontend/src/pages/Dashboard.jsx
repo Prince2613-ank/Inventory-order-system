@@ -44,7 +44,6 @@ export default function Dashboard() {
         <p className="page-subtitle">Live overview of your inventory and sales</p>
       </div>
 
-      {/* ── Stat cards ── */}
       <div className="stat-grid stat-grid-4">
         {STATS.map(({ key, label, icon, cls, fmt }) => (
           <div key={key} className={`stat-card ${cls}`}>
@@ -59,7 +58,6 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* ── Two-column: chart + recent orders ── */}
       <div className="dashboard-grid">
         <div className="card dashboard-panel">
           <h2 className="section-heading" style={{ marginBottom: "1.25rem" }}>📊 Stock Levels</h2>
@@ -94,7 +92,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ── Low stock alerts ── */}
       <div>
         <div className="low-stock-header" style={{ marginBottom: "0.75rem" }}>
           <h2 className="section-heading">⚠ Low Stock Alert</h2>

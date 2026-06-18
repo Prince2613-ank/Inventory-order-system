@@ -38,15 +38,9 @@ def create_product(db: Session, payload: schemas.ProductCreate) -> models.Produc
 
 
 def bulk_create_products(db: Session, payloads: List[schemas.ProductCreate]) -> schemas.BulkProductResult:
-    """
-    Insert multiple products in a single transaction.
-    On any IntegrityError the entire batch is rolled back so no partial state is committed.
-    Individual validation errors (e.g. duplicate SKU within the batch) are collected and returned.
-    """
     created = 0
     errors: List[str] = []
 
-    # Pre-check for duplicates within the submitted batch itself
     skus = [p.sku for p in payloads]
     seen: set = set()
     for sku in skus:

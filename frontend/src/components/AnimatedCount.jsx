@@ -1,10 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 
-/**
- * Counts up from 0 to `value` with an ease-out animation.
- * @param {number|string} value   — target value
- * @param {"integer"|"currency"}  format — how to display the value
- */
 export default function AnimatedCount({ value, format = "integer" }) {
   const [progress, setProgress] = useState(0);
   const frameRef = useRef(null);

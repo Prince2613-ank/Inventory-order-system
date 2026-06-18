@@ -1,4 +1,5 @@
 import os
+from contextlib import asynccontextmanager
 from decimal import Decimal
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,7 +9,12 @@ from .database import engine, Base, get_db
 from . import models, schemas
 from .routers import products, customers, orders
 
-Base.metadata.create_all(bind=engine)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    Base.metadata.create_all(bind=engine)
+    yield
+
 
 app = FastAPI(
     title="Inventory & Order Management API",
@@ -18,6 +24,7 @@ app = FastAPI(
         "atomic stock control, full-text search, and dashboard analytics."
     ),
     version="1.1.0",
+    lifespan=lifespan,
 )
 
 _raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:80,http://localhost")

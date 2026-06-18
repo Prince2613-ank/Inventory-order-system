@@ -5,10 +5,6 @@ from typing import List, Optional
 from pydantic import BaseModel, EmailStr, field_validator
 
 
-# ---------------------------------------------------------------------------
-# Product schemas
-# ---------------------------------------------------------------------------
-
 class ProductBase(BaseModel):
     name: str
     sku: str
@@ -103,10 +99,6 @@ class BulkProductResult(BaseModel):
     errors: List[str]
 
 
-# ---------------------------------------------------------------------------
-# Customer schemas
-# ---------------------------------------------------------------------------
-
 PHONE_RE = re.compile(r"^\+?[\d\s\-().]{7,20}$")
 
 
@@ -146,10 +138,6 @@ class CustomerResponse(CustomerBase):
 
     model_config = {"from_attributes": True}
 
-
-# ---------------------------------------------------------------------------
-# Order schemas
-# ---------------------------------------------------------------------------
 
 class OrderItemCreate(BaseModel):
     product_id: int
@@ -196,10 +184,6 @@ class OrderResponse(BaseModel):
 
     model_config = {"from_attributes": True}
 
-
-# ---------------------------------------------------------------------------
-# Dashboard schemas
-# ---------------------------------------------------------------------------
 
 class RecentOrderSummary(BaseModel):
     id: int
