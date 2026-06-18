@@ -1,0 +1,38 @@
+# Environment files
+.env
+*.env
+!*.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+*.egg
+
+# Node / Frontend
+node_modules/
+frontend/build/
+frontend/dist/
+.npm
+
+# Docker
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Postgres data (if running locally without Docker volume)
+pgdata/
