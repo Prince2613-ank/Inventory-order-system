@@ -40,11 +40,10 @@ export default function OrderForm({ onSubmit, loading }) {
     items.forEach((item, i) => {
       if (!item.product_id) e[`item_${i}_product_id`] = "Select a product";
       const qty = parseInt(item.quantity, 10);
-      if (!item.quantity || isNaN(qty) || qty <= 0) e[`item_${i}_quantity`] = "Quantity must be > 0";
+      if (!item.quantity || isNaN(qty) || qty <= 0) e[`item_${i}_quantity`] = "Must be > 0";
     });
-    // Check for duplicate products
     const ids = items.map((it) => it.product_id).filter(Boolean);
-    if (new Set(ids).size !== ids.length) e.duplicates = "Remove duplicate products (combine quantities instead)";
+    if (new Set(ids).size !== ids.length) e.duplicates = "Remove duplicate products — combine quantities instead";
     return e;
   }
 
@@ -58,61 +57,86 @@ export default function OrderForm({ onSubmit, loading }) {
     });
   }
 
-  if (fetchError) return <div className="error-banner">{fetchError}</div>;
+  if (fetchError) return <div className="error-banner">⚠ {fetchError}</div>;
 
   return (
     <form className="form-card" onSubmit={handleSubmit} noValidate>
+      <div className="form-card-title">🧾 Place New Order</div>
+
       <div className="form-group">
         <label>Customer</label>
-        <select value={customerId} onChange={(e) => { setCustomerId(e.target.value); setErrors((er) => ({ ...er, customerId: undefined })); }}>
+        <select
+          value={customerId}
+          onChange={(e) => { setCustomerId(e.target.value); setErrors((er) => ({ ...er, customerId: undefined })); }}
+        >
           <option value="">— select customer —</option>
-          {customers.map((c) => <option key={c.id} value={c.id}>{c.full_name} ({c.email})</option>)}
+          {customers.map((c) => (
+            <option key={c.id} value={c.id}>{c.full_name} · {c.email}</option>
+          ))}
         </select>
-        {errors.customerId && <span className="field-error">{errors.customerId}</span>}
+        {errors.customerId && <span className="field-error">⚠ {errors.customerId}</span>}
       </div>
 
-      <label className="section-label">Order Items</label>
-      {items.map((item, index) => (
-        <div key={index} className="order-item-row">
-          <div className="form-group" style={{ flex: 2 }}>
-            <select
-              value={item.product_id}
-              onChange={(e) => handleItemChange(index, "product_id", e.target.value)}
-            >
-              <option value="">— select product —</option>
-              {products.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name} (SKU: {p.sku}) — ${parseFloat(p.price).toFixed(2)} | Stock: {p.quantity_in_stock}
-                </option>
-              ))}
-            </select>
-            {errors[`item_${index}_product_id`] && <span className="field-error">{errors[`item_${index}_product_id`]}</span>}
-          </div>
-          <div className="form-group" style={{ flex: 1 }}>
-            <input
-              type="number"
-              min="1"
-              value={item.quantity}
-              onChange={(e) => handleItemChange(index, "quantity", e.target.value)}
-              placeholder="Qty"
-            />
-            {errors[`item_${index}_quantity`] && <span className="field-error">{errors[`item_${index}_quantity`]}</span>}
-          </div>
-          {items.length > 1 && (
-            <button className="btn btn-danger btn-sm" type="button" onClick={() => removeItem(index)}>✕</button>
-          )}
+      <div>
+        <div className="section-label" style={{ marginBottom: "0.6rem" }}>Order Items</div>
+        <div className="order-items-container">
+          {items.map((item, index) => (
+            <div key={index} className="order-item-row">
+              <div className="form-group" style={{ flex: 3 }}>
+                <select
+                  value={item.product_id}
+                  onChange={(e) => handleItemChange(index, "product_id", e.target.value)}
+                >
+                  <option value="">— select product —</option>
+                  {products.map((p) => (
+                    <option key={p.id} value={p.id} disabled={p.quantity_in_stock === 0}>
+                      {p.name} (SKU: {p.sku}) — ${parseFloat(p.price).toFixed(2)} | Stock: {p.quantity_in_stock}{p.quantity_in_stock === 0 ? " ⛔" : ""}
+                    </option>
+                  ))}
+                </select>
+                {errors[`item_${index}_product_id`] && (
+                  <span className="field-error">⚠ {errors[`item_${index}_product_id`]}</span>
+                )}
+              </div>
+              <div className="form-group" style={{ flex: 1, minWidth: "80px" }}>
+                <input
+                  type="number"
+                  min="1"
+                  value={item.quantity}
+                  onChange={(e) => handleItemChange(index, "quantity", e.target.value)}
+                  placeholder="Qty"
+                />
+                {errors[`item_${index}_quantity`] && (
+                  <span className="field-error">⚠ {errors[`item_${index}_quantity`]}</span>
+                )}
+              </div>
+              {items.length > 1 && (
+                <button
+                  className="btn btn-sm btn-danger"
+                  type="button"
+                  onClick={() => removeItem(index)}
+                  style={{ alignSelf: "center", marginTop: "0.1rem" }}
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          ))}
         </div>
-      ))}
-      {errors.duplicates && <span className="field-error">{errors.duplicates}</span>}
-      <button className="btn btn-secondary btn-sm" type="button" onClick={addItem}>+ Add Item</button>
+        {errors.duplicates && <span className="field-error" style={{ marginTop: "0.4rem" }}>⚠ {errors.duplicates}</span>}
+        <button className="btn btn-secondary btn-sm" type="button" onClick={addItem} style={{ marginTop: "0.6rem" }}>
+          + Add Another Product
+        </button>
+      </div>
 
       <div className="order-total">
-        Computed Total: <strong>${computedTotal.toFixed(2)}</strong>
+        <span>Computed Total:</span>
+        <strong>${computedTotal.toFixed(2)}</strong>
       </div>
 
       <div className="form-actions">
-        <button className="btn btn-primary" type="submit" disabled={loading}>
-          {loading ? "Placing Order…" : "Place Order"}
+        <button className="btn btn-success btn-lg" type="submit" disabled={loading}>
+          {loading ? "Placing Order…" : "✓ Place Order"}
         </button>
       </div>
     </form>

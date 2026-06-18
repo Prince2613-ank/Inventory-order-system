@@ -13,12 +13,12 @@ export default function ProductForm({ initial, onSubmit, onCancel, loading }) {
 
   function validate() {
     const e = {};
-    if (!form.name.trim()) e.name = "Name is required";
+    if (!form.name.trim()) e.name = "Product name is required";
     if (!form.sku.trim()) e.sku = "SKU is required";
     const price = parseFloat(form.price);
-    if (form.price === "" || isNaN(price) || price < 0) e.price = "Price must be a non-negative number";
+    if (form.price === "" || isNaN(price) || price < 0) e.price = "Must be a non-negative number";
     const qty = parseInt(form.quantity_in_stock, 10);
-    if (form.quantity_in_stock === "" || isNaN(qty) || qty < 0) e.quantity_in_stock = "Quantity must be a non-negative integer";
+    if (form.quantity_in_stock === "" || isNaN(qty) || qty < 0) e.quantity_in_stock = "Must be a non-negative integer";
     return e;
   }
 
@@ -42,31 +42,40 @@ export default function ProductForm({ initial, onSubmit, onCancel, loading }) {
 
   return (
     <form className="form-card" onSubmit={handleSubmit} noValidate>
-      <div className="form-group">
-        <label>Product Name</label>
-        <input name="name" value={form.name} onChange={handleChange} placeholder="e.g. Widget Pro" />
-        {errors.name && <span className="field-error">{errors.name}</span>}
+      <div className="form-card-title">
+        {initial ? "✎ Edit Product" : "＋ New Product"}
       </div>
-      <div className="form-group">
-        <label>SKU</label>
-        <input name="sku" value={form.sku} onChange={handleChange} placeholder="e.g. WGT-001" />
-        {errors.sku && <span className="field-error">{errors.sku}</span>}
+      <div className="form-row">
+        <div className="form-group">
+          <label>Product Name</label>
+          <input name="name" value={form.name} onChange={handleChange} placeholder="e.g. Widget Pro" />
+          {errors.name && <span className="field-error">⚠ {errors.name}</span>}
+        </div>
+        <div className="form-group">
+          <label>SKU / Code</label>
+          <input name="sku" value={form.sku} onChange={handleChange} placeholder="e.g. WGT-001" />
+          {errors.sku && <span className="field-error">⚠ {errors.sku}</span>}
+        </div>
       </div>
-      <div className="form-group">
-        <label>Price ($)</label>
-        <input name="price" type="number" step="0.01" min="0" value={form.price} onChange={handleChange} placeholder="0.00" />
-        {errors.price && <span className="field-error">{errors.price}</span>}
-      </div>
-      <div className="form-group">
-        <label>Quantity in Stock</label>
-        <input name="quantity_in_stock" type="number" min="0" value={form.quantity_in_stock} onChange={handleChange} placeholder="0" />
-        {errors.quantity_in_stock && <span className="field-error">{errors.quantity_in_stock}</span>}
+      <div className="form-row">
+        <div className="form-group">
+          <label>Price (USD)</label>
+          <input name="price" type="number" step="0.01" min="0" value={form.price} onChange={handleChange} placeholder="0.00" />
+          {errors.price && <span className="field-error">⚠ {errors.price}</span>}
+        </div>
+        <div className="form-group">
+          <label>Quantity in Stock</label>
+          <input name="quantity_in_stock" type="number" min="0" value={form.quantity_in_stock} onChange={handleChange} placeholder="0" />
+          {errors.quantity_in_stock && <span className="field-error">⚠ {errors.quantity_in_stock}</span>}
+        </div>
       </div>
       <div className="form-actions">
         <button className="btn btn-primary" type="submit" disabled={loading}>
-          {loading ? "Saving…" : initial ? "Update Product" : "Create Product"}
+          {loading ? "Saving…" : initial ? "Save Changes" : "Create Product"}
         </button>
-        {onCancel && <button className="btn btn-secondary" type="button" onClick={onCancel}>Cancel</button>}
+        {onCancel && (
+          <button className="btn btn-secondary" type="button" onClick={onCancel}>Cancel</button>
+        )}
       </div>
     </form>
   );
