@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from decimal import Decimal
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import func
+from sqlalchemy import func, text, distinct
 from sqlalchemy.orm import Session, joinedload
 from .database import engine, Base, get_db
 from . import models, schemas
@@ -13,6 +13,12 @@ from .routers import products, customers, orders
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
+    with engine.begin() as connection:
+        connection.execute(text("ALTER TABLE products ALTER COLUMN created_at SET DEFAULT NOW()"))
+        connection.execute(text("ALTER TABLE products ALTER COLUMN updated_at SET DEFAULT NOW()"))
+        connection.execute(text("ALTER TABLE customers ALTER COLUMN created_at SET DEFAULT NOW()"))
+        connection.execute(text("ALTER TABLE orders ALTER COLUMN created_at SET DEFAULT NOW()"))
+        connection.execute(text("ALTER TABLE orders ALTER COLUMN status SET DEFAULT 'active'"))
     yield
 
 
@@ -51,8 +57,16 @@ def dashboard(db: Session = Depends(get_db)):
     total_products = db.query(models.Product).count()
     total_customers = db.query(models.Customer).count()
     total_orders = db.query(models.Order).count()
+    active_orders = db.query(models.Order).filter(models.Order.status == "active").count()
+    completed_orders = db.query(models.Order).filter(models.Order.status == "completed").count()
+    cancelled_orders = db.query(models.Order).filter(models.Order.status == "cancelled").count()
+    customers_with_orders = db.query(func.count(distinct(models.Order.customer_id))).scalar() or 0
 
-    revenue_raw = db.query(func.sum(models.Order.total_amount)).scalar()
+    revenue_raw = (
+        db.query(func.sum(models.Order.total_amount))
+        .filter(models.Order.status == "completed")
+        .scalar()
+    )
     total_revenue = Decimal(str(revenue_raw)) if revenue_raw is not None else Decimal("0")
 
     low_stock = (
@@ -89,6 +103,11 @@ def dashboard(db: Session = Depends(get_db)):
         total_customers=total_customers,
         total_orders=total_orders,
         total_revenue=total_revenue,
+        active_orders=active_orders,
+        completed_orders=completed_orders,
+        cancelled_orders=cancelled_orders,
+        customers_with_orders=customers_with_orders,
+        low_stock_count=len(low_stock),
         low_stock_products=low_stock,
         recent_orders=recent_orders,
     )

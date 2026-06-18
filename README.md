@@ -14,7 +14,7 @@ A production-ready full-stack web application for managing products, customers, 
 
 ---
 
-## Running Locally with Docker Compose (Recommended)
+## Local Dev: Docker PostgreSQL + Separate Backend/Frontend
 
 **Prerequisites:** Docker Desktop installed and running.
 
@@ -35,13 +35,58 @@ POSTGRES_PASSWORD=your_strong_password_here
 ALLOWED_ORIGINS=http://localhost:3000,http://localhost,http://localhost:80
 ```
 
-### 2. Start all three services
+### 2. Start only PostgreSQL in Docker
 
 ```bash
-docker-compose up --build
+docker compose up -d db
 ```
 
-### 3. Access the application
+PostgreSQL is published to the host on `localhost:5432`, so a separately-run backend can connect to it.
+
+### 3. Run the backend locally
+
+```bash
+cd backend
+
+# Recommended: use Python 3.11 to match the backend Docker image
+py -3.11 -m venv .venv
+
+# Windows:
+.venv\Scripts\activate
+
+pip install -r requirements.txt
+
+# backend/.env should point to localhost, not Docker's db hostname:
+# DATABASE_URL=postgresql://postgres:postgres123@localhost:5432/inventory_db
+
+python -m uvicorn app.main:app --reload --port 8000
+```
+
+API docs: http://localhost:8000/docs
+
+### 4. Run the frontend locally
+
+```bash
+cd frontend
+npm install
+
+# frontend/.env should contain:
+# REACT_APP_API_URL=http://localhost:8000
+
+npm start
+```
+
+Frontend: http://localhost:3000
+
+### 5. Run everything with Docker Compose later
+
+After the separate local backend/frontend setup is working:
+
+```bash
+docker compose up --build
+```
+
+### 6. Access the containerized application
 
 | Service | URL |
 |---------|-----|
@@ -53,44 +98,7 @@ docker-compose up --build
 
 ---
 
-## Running Without Docker (Local Dev)
-
-### Backend
-
-```bash
-cd backend
-python -m venv .venv
-# Windows:
-.venv\Scripts\activate
-# macOS/Linux:
-source .venv/bin/activate
-
-pip install -r requirements.txt
-
-# Create backend/.env
-cp .env.example .env
-# Edit DATABASE_URL to point to your local Postgres:
-# DATABASE_URL=postgresql://postgres:password@localhost:5432/inventory_db
-
-uvicorn app.main:app --reload --port 8000
-```
-
 > `database.py` automatically normalises `postgresql://` → `postgresql+psycopg://` so psycopg3 always connects correctly.
-
-API docs: http://localhost:8000/docs
-
-### Frontend
-
-```bash
-cd frontend
-npm install
-echo "REACT_APP_API_URL=http://localhost:8000" > .env
-npm start
-```
-
-Frontend: http://localhost:3000
-
----
 
 ## API Endpoint Summary
 
@@ -149,8 +157,8 @@ Frontend: http://localhost:3000
 ## Docker Architecture
 
 ```
-docker-compose up
-├── db          postgres:16-alpine     port 5432 (internal)
+docker compose up
+├── db          postgres:16-alpine     port 5432 → host 5432
 ├── backend     python:3.11-slim       port 8000 → host 8000
 └── frontend    nginx:1.25-alpine      port 80  → host 80
 ```

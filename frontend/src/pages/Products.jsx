@@ -1,5 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
+import React from "react";
 import toast from "react-hot-toast";
+import { Package, Search, Pencil, Trash2, Download, X, XCircle, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { getProducts, createProduct, updateProduct, deleteProduct } from "../services/api";
 import ProductForm from "../components/ProductForm";
 import ConfirmModal from "../components/ConfirmModal";
@@ -10,9 +12,9 @@ import { useSortableData } from "../hooks/useSortableData";
 import { exportToCsv } from "../utils/exportCsv";
 
 function StockBadge({ qty }) {
-  if (qty === 0) return <span className="stock-chip stock-empty">⛔ Out of Stock</span>;
-  if (qty < 10) return <span className="stock-chip stock-low">⚠ {qty}</span>;
-  return <span className="stock-chip stock-ok">✓ {qty}</span>;
+  if (qty === 0) return <span className="stock-chip stock-empty"><XCircle size={12} /> Out of Stock</span>;
+  if (qty < 10) return <span className="stock-chip stock-low"><AlertTriangle size={12} /> {qty}</span>;
+  return <span className="stock-chip stock-ok"><CheckCircle2 size={12} /> {qty}</span>;
 }
 
 export default function Products() {
@@ -97,13 +99,13 @@ export default function Products() {
           <h1>Products</h1>
           <p className="page-subtitle">{products.length} product{products.length !== 1 ? "s" : ""} in catalog</p>
         </div>
-        <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
-          <button className="btn btn-secondary" onClick={handleExport} title="Export to CSV">⬇ Export CSV</button>
+        <div className="page-actions">
+          <button className="btn btn-secondary" onClick={handleExport}><Download size={15} /> Export CSV</button>
           <button
             className="btn btn-primary btn-lg"
             onClick={() => { setShowForm((v) => !v); setEditing(null); }}
           >
-            {showForm ? "✕ Close" : "+ New Product"}
+            {showForm ? <><X size={15} /> Close</> : "+ New Product"}
           </button>
         </div>
       </div>
@@ -122,7 +124,9 @@ export default function Products() {
       {sorted.length === 0 ? (
         <div className="table-wrapper">
           <div className="empty-state">
-            <div className="empty-state-icon">{debouncedSearch ? "🔍" : "📦"}</div>
+            <div className="empty-state-svg">
+              {debouncedSearch ? <Search size={36} /> : <Package size={36} />}
+            </div>
             <p>{debouncedSearch ? `No products match "${debouncedSearch}"` : "No products yet — add your first one above"}</p>
           </div>
         </div>
@@ -131,36 +135,37 @@ export default function Products() {
           <table className="data-table">
             <thead>
               <tr>
-                <SortableTh label="#" sortKey="id" sort={sort} onSort={requestSort} />
-                <SortableTh label="Product Name" sortKey="name" sort={sort} onSort={requestSort} />
-                <SortableTh label="SKU" sortKey="sku" sort={sort} onSort={requestSort} />
-                <SortableTh label="Price" sortKey="price" sort={sort} onSort={requestSort} />
-                <SortableTh label="Stock" sortKey="quantity_in_stock" sort={sort} onSort={requestSort} />
+                <SortableTh label="#"            sortKey="id"               sort={sort} onSort={requestSort} />
+                <SortableTh label="Product Name" sortKey="name"             sort={sort} onSort={requestSort} />
+                <SortableTh label="SKU"          sortKey="sku"              sort={sort} onSort={requestSort} />
+                <SortableTh label="Price"        sortKey="price"            sort={sort} onSort={requestSort} />
+                <SortableTh label="Stock"        sortKey="quantity_in_stock" sort={sort} onSort={requestSort} />
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {sorted.map((p) => (
-                <>
-                  <tr
-                    key={p.id}
-                    className={p.quantity_in_stock === 0 ? "row-danger" : p.quantity_in_stock < 10 ? "row-warning" : ""}
-                  >
-                    <td style={{ color: "var(--navy-400)", fontWeight: 600 }}>{p.id}</td>
+                <React.Fragment key={p.id}>
+                  <tr className={p.quantity_in_stock === 0 ? "row-danger" : p.quantity_in_stock < 10 ? "row-warning" : ""}>
+                    <td className="td-id">{p.id}</td>
                     <td><strong>{p.name}</strong></td>
                     <td><span className="sku-chip">{p.sku}</span></td>
                     <td><span className="price">${parseFloat(p.price).toFixed(2)}</span></td>
                     <td><StockBadge qty={p.quantity_in_stock} /></td>
-                    <td className="action-cell">
-                      <button className="btn btn-sm btn-secondary" onClick={() => { setEditing(p); setShowForm(false); }}>
-                        ✎ Edit
-                      </button>
-                      <button className="btn btn-sm btn-danger" onClick={() => setDeleteTarget(p)}>Delete</button>
+                    <td>
+                      <div className="action-cell">
+                        <button className="btn btn-sm btn-secondary" onClick={() => { setEditing(p); setShowForm(false); }}>
+                          <Pencil size={13} /> Edit
+                        </button>
+                        <button className="btn btn-sm btn-danger" onClick={() => setDeleteTarget(p)}>
+                          <Trash2 size={13} /> Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                   {editing?.id === p.id && (
-                    <tr key={`edit-${p.id}`}>
-                      <td colSpan={6} style={{ padding: "1rem 1.1rem", background: "rgba(99,102,241,.03)" }}>
+                    <tr>
+                      <td colSpan={6} className="inline-edit-cell">
                         <ProductForm
                           initial={{ name: p.name, sku: p.sku, price: String(p.price), quantity_in_stock: String(p.quantity_in_stock) }}
                           onSubmit={handleUpdate}
@@ -170,7 +175,7 @@ export default function Products() {
                       </td>
                     </tr>
                   )}
-                </>
+                </React.Fragment>
               ))}
             </tbody>
           </table>

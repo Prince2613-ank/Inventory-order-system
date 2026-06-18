@@ -28,11 +28,16 @@ def create_product(db: Session, payload: schemas.ProductCreate) -> models.Produc
     try:
         db.commit()
         db.refresh(product)
-    except IntegrityError:
+    except IntegrityError as exc:
         db.rollback()
+        if "uq_products_sku" in str(exc.orig):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"A product with SKU '{payload.sku}' already exists",
+            )
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=f"A product with SKU '{payload.sku}' already exists",
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Product could not be created because of a database constraint",
         )
     return product
 
@@ -73,11 +78,16 @@ def update_product(db: Session, product_id: int, payload: schemas.ProductUpdate)
     try:
         db.commit()
         db.refresh(product)
-    except IntegrityError:
+    except IntegrityError as exc:
         db.rollback()
+        if "uq_products_sku" in str(exc.orig):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"A product with SKU '{payload.sku}' already exists",
+            )
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=f"A product with SKU '{payload.sku}' already exists",
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Product could not be updated because of a database constraint",
         )
     return product
 

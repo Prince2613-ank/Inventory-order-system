@@ -1,3 +1,5 @@
+import { ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
+
 export default function SortableTh({ label, sortKey, sort, onSort }) {
   const active = sort.key === sortKey;
   return (
@@ -8,7 +10,9 @@ export default function SortableTh({ label, sortKey, sort, onSort }) {
     >
       {label}
       <span className="sort-icon">
-        {active ? (sort.dir === "asc" ? " ↑" : " ↓") : " ⇅"}
+        {active
+          ? (sort.dir === "asc" ? <ArrowUp size={12} /> : <ArrowDown size={12} />)
+          : <ArrowUpDown size={12} />}
       </span>
     </th>
   );

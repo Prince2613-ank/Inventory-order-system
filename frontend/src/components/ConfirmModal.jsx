@@ -1,7 +1,7 @@
 import { useEffect } from "react";
+import { AlertTriangle } from "lucide-react";
 
 export default function ConfirmModal({ title = "Confirm Action", message, onConfirm, onCancel }) {
-  // Close on ESC key
   useEffect(() => {
     const handler = (e) => { if (e.key === "Escape") onCancel(); };
     document.addEventListener("keydown", handler);
@@ -11,7 +11,7 @@ export default function ConfirmModal({ title = "Confirm Action", message, onConf
   return (
     <div className="modal-backdrop" onClick={onCancel}>
       <div className="modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
-        <div className="modal-icon">⚠️</div>
+        <div className="modal-icon"><AlertTriangle size={26} color="var(--rose-600)" /></div>
         <h3>{title}</h3>
         <p>{message}</p>
         <div className="modal-actions">

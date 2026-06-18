@@ -1,8 +1,10 @@
+import { BarChart2 } from "lucide-react";
+
 export default function StockChart({ products }) {
   if (!products || products.length === 0) {
     return (
-      <div className="empty-state" style={{ padding: "2rem" }}>
-        <div className="empty-state-icon">📊</div>
+      <div className="empty-state empty-state-sm">
+        <div className="empty-state-svg"><BarChart2 size={36} /></div>
         <p>No products to display</p>
       </div>
     );
@@ -24,10 +26,7 @@ export default function StockChart({ products }) {
           <div key={p.id} className="chart-row" style={{ animationDelay: `${i * 50}ms` }}>
             <div className="chart-label" title={p.name}>{p.name}</div>
             <div className="chart-track">
-              <div
-                className={`chart-bar ${barCls}`}
-                style={{ "--bar-pct": `${pct}%` }}
-              />
+              <div className={`chart-bar ${barCls}`} style={{ "--bar-pct": `${pct}%` }} />
             </div>
             <div className="chart-val">{p.quantity_in_stock}</div>
           </div>

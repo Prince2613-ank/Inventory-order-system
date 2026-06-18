@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { AlertCircle, Plus } from "lucide-react";
 
 const PHONE_RE = /^\+?[\d\s\-().]{7,20}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -35,23 +36,23 @@ export default function CustomerForm({ onSubmit, loading }) {
 
   return (
     <form className="form-card" onSubmit={handleSubmit} noValidate>
-      <div className="form-card-title">＋ Add New Customer</div>
+      <div className="form-card-title"><Plus size={15} /> Add New Customer</div>
       <div className="form-row">
         <div className="form-group">
           <label>Full Name</label>
           <input name="full_name" value={form.full_name} onChange={handleChange} placeholder="Jane Doe" />
-          {errors.full_name && <span className="field-error">⚠ {errors.full_name}</span>}
+          {errors.full_name && <span className="field-error"><AlertCircle size={13} /> {errors.full_name}</span>}
         </div>
         <div className="form-group">
           <label>Email Address</label>
           <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="jane@example.com" />
-          {errors.email && <span className="field-error">⚠ {errors.email}</span>}
+          {errors.email && <span className="field-error"><AlertCircle size={13} /> {errors.email}</span>}
         </div>
       </div>
-      <div className="form-group" style={{ maxWidth: "50%" }}>
-        <label>Phone <span style={{ color: "var(--navy-300)", fontWeight: 400, textTransform: "none", fontSize: "0.78rem" }}>(optional)</span></label>
+      <div className="form-group form-group-half">
+        <label>Phone <span className="label-optional">(optional)</span></label>
         <input name="phone" value={form.phone} onChange={handleChange} placeholder="+1 555 000 0000" />
-        {errors.phone && <span className="field-error">⚠ {errors.phone}</span>}
+        {errors.phone && <span className="field-error"><AlertCircle size={13} /> {errors.phone}</span>}
       </div>
       <div className="form-actions">
         <button className="btn btn-primary" type="submit" disabled={loading}>

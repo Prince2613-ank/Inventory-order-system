@@ -131,13 +131,36 @@ def create_order(db: Session, payload: schemas.OrderCreate) -> schemas.OrderResp
     return get_order(db, order.id)
 
 
-def delete_order(db: Session, order_id: int) -> None:
+def cancel_order(db: Session, order_id: int) -> schemas.OrderResponse:
     order = _load_order(db, order_id)
+
+    if order.status != "active":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Only active orders can be cancelled (current status: {order.status})",
+        )
 
     for item in order.items:
         product = db.query(models.Product).filter(models.Product.id == item.product_id).first()
         if product:
             product.quantity_in_stock += item.quantity
 
-    db.delete(order)
+    order.status = "cancelled"
     db.commit()
+
+    return _build_order_response(order)
+
+
+def complete_order(db: Session, order_id: int) -> schemas.OrderResponse:
+    order = _load_order(db, order_id)
+
+    if order.status != "active":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Only active orders can be completed (current status: {order.status})",
+        )
+
+    order.status = "completed"
+    db.commit()
+
+    return _build_order_response(order)

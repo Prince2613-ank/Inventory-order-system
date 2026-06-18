@@ -198,5 +198,10 @@ class DashboardResponse(BaseModel):
     total_customers: int
     total_orders: int
     total_revenue: Decimal
+    active_orders: int
+    completed_orders: int
+    cancelled_orders: int
+    customers_with_orders: int
+    low_stock_count: int
     low_stock_products: List[ProductResponse]
     recent_orders: List[RecentOrderSummary]

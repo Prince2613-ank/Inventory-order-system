@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import toast from "react-hot-toast";
+import { Download, X, Search, Users } from "lucide-react";
 import { getCustomers, createCustomer, deleteCustomer } from "../services/api";
 import CustomerForm from "../components/CustomerForm";
 import ConfirmModal from "../components/ConfirmModal";
@@ -8,19 +9,6 @@ import SortableTh from "../components/SortableTh";
 import { useDebounce } from "../hooks/useDebounce";
 import { useSortableData } from "../hooks/useSortableData";
 import { exportToCsv } from "../utils/exportCsv";
-
-function AvatarCircle({ name, size = 32 }) {
-  return (
-    <div style={{
-      width: size, height: size, borderRadius: "50%",
-      background: "linear-gradient(135deg, var(--indigo-500), var(--sky-500))",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      color: "#fff", fontWeight: 700, fontSize: `${size * 0.38}px`, flexShrink: 0,
-    }}>
-      {name.charAt(0).toUpperCase()}
-    </div>
-  );
-}
 
 export default function Customers() {
   const [customers, setCustomers] = useState([]);
@@ -90,10 +78,10 @@ export default function Customers() {
           <h1>Customers</h1>
           <p className="page-subtitle">{customers.length} registered customer{customers.length !== 1 ? "s" : ""}</p>
         </div>
-        <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
-          <button className="btn btn-secondary" onClick={handleExport}>⬇ Export CSV</button>
+        <div className="page-actions">
+          <button className="btn btn-secondary" onClick={handleExport}><Download size={15} /> Export CSV</button>
           <button className="btn btn-primary btn-lg" onClick={() => setShowForm((v) => !v)}>
-            {showForm ? "✕ Close" : "+ Add Customer"}
+            {showForm ? <><X size={15} /> Close</> : "+ Add Customer"}
           </button>
         </div>
       </div>
@@ -110,7 +98,9 @@ export default function Customers() {
       {sorted.length === 0 ? (
         <div className="table-wrapper">
           <div className="empty-state">
-            <div className="empty-state-icon">{debouncedSearch ? "🔍" : "👥"}</div>
+            <div className="empty-state-svg">
+              {debouncedSearch ? <Search size={36} /> : <Users size={36} />}
+            </div>
             <p>{debouncedSearch ? `No customers match "${debouncedSearch}"` : "No customers yet"}</p>
           </div>
         </div>
@@ -130,18 +120,20 @@ export default function Customers() {
             <tbody>
               {sorted.map((c) => (
                 <tr key={c.id}>
-                  <td style={{ color: "var(--navy-400)", fontWeight: 600 }}>{c.id}</td>
+                  <td className="td-id">{c.id}</td>
                   <td>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-                      <AvatarCircle name={c.full_name} />
+                    <div className="td-name-cell">
+                      <div className="avatar">{c.full_name.charAt(0).toUpperCase()}</div>
                       <strong>{c.full_name}</strong>
                     </div>
                   </td>
-                  <td style={{ color: "var(--indigo-600)", fontWeight: 500 }}>{c.email}</td>
-                  <td>{c.phone || <span style={{ color: "var(--navy-300)" }}>—</span>}</td>
-                  <td style={{ color: "var(--navy-400)" }}>{new Date(c.created_at).toLocaleDateString()}</td>
-                  <td className="action-cell">
-                    <button className="btn btn-sm btn-danger" onClick={() => setDeleteTarget(c)}>Delete</button>
+                  <td className="td-email">{c.email}</td>
+                  <td>{c.phone || <span className="td-muted">—</span>}</td>
+                  <td className="td-date">{new Date(c.created_at).toLocaleDateString()}</td>
+                  <td>
+                    <div className="action-cell">
+                      <button className="btn btn-sm btn-danger" onClick={() => setDeleteTarget(c)}>Delete</button>
+                    </div>
                   </td>
                 </tr>
               ))}

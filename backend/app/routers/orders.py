@@ -23,6 +23,11 @@ def create_order(payload: schemas.OrderCreate, db: Session = Depends(get_db)):
     return crud.create_order(db, payload)
 
 
-@router.delete("/{order_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_order(order_id: int, db: Session = Depends(get_db)):
-    crud.delete_order(db, order_id)
+@router.patch("/{order_id}/cancel", response_model=schemas.OrderResponse)
+def cancel_order(order_id: int, db: Session = Depends(get_db)):
+    return crud.cancel_order(db, order_id)
+
+
+@router.patch("/{order_id}/complete", response_model=schemas.OrderResponse)
+def complete_order(order_id: int, db: Session = Depends(get_db)):
+    return crud.complete_order(db, order_id)

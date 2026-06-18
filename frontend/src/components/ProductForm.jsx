@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { AlertCircle, Pencil, Plus } from "lucide-react";
 
 const EMPTY = { name: "", sku: "", price: "", quantity_in_stock: "" };
 
@@ -43,30 +44,32 @@ export default function ProductForm({ initial, onSubmit, onCancel, loading }) {
   return (
     <form className="form-card" onSubmit={handleSubmit} noValidate>
       <div className="form-card-title">
-        {initial ? "✎ Edit Product" : "＋ New Product"}
+        {initial
+          ? <><Pencil size={15} /> Edit Product</>
+          : <><Plus size={15} /> New Product</>}
       </div>
       <div className="form-row">
         <div className="form-group">
           <label>Product Name</label>
           <input name="name" value={form.name} onChange={handleChange} placeholder="e.g. Widget Pro" />
-          {errors.name && <span className="field-error">⚠ {errors.name}</span>}
+          {errors.name && <span className="field-error"><AlertCircle size={13} /> {errors.name}</span>}
         </div>
         <div className="form-group">
           <label>SKU / Code</label>
           <input name="sku" value={form.sku} onChange={handleChange} placeholder="e.g. WGT-001" />
-          {errors.sku && <span className="field-error">⚠ {errors.sku}</span>}
+          {errors.sku && <span className="field-error"><AlertCircle size={13} /> {errors.sku}</span>}
         </div>
       </div>
       <div className="form-row">
         <div className="form-group">
           <label>Price (USD)</label>
           <input name="price" type="number" step="0.01" min="0" value={form.price} onChange={handleChange} placeholder="0.00" />
-          {errors.price && <span className="field-error">⚠ {errors.price}</span>}
+          {errors.price && <span className="field-error"><AlertCircle size={13} /> {errors.price}</span>}
         </div>
         <div className="form-group">
           <label>Quantity in Stock</label>
           <input name="quantity_in_stock" type="number" min="0" value={form.quantity_in_stock} onChange={handleChange} placeholder="0" />
-          {errors.quantity_in_stock && <span className="field-error">⚠ {errors.quantity_in_stock}</span>}
+          {errors.quantity_in_stock && <span className="field-error"><AlertCircle size={13} /> {errors.quantity_in_stock}</span>}
         </div>
       </div>
       <div className="form-actions">

@@ -43,6 +43,9 @@ class Customer(Base):
 
 class Order(Base):
     __tablename__ = "orders"
+    __table_args__ = (
+        CheckConstraint("status IN ('active', 'completed', 'cancelled')", name="ck_orders_status"),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
     customer_id = Column(Integer, ForeignKey("customers.id"), nullable=False)

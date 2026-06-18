@@ -1,20 +1,23 @@
 import { useEffect, useState, useMemo } from "react";
+import React from "react";
 import toast from "react-hot-toast";
-import { getOrders, createOrder, deleteOrder } from "../services/api";
+import { FileText, ChevronDown, ChevronUp, Download, X, CheckCircle2 } from "lucide-react";
+import { getOrders, createOrder, cancelOrder, completeOrder } from "../services/api";
 import OrderForm from "../components/OrderForm";
 import ConfirmModal from "../components/ConfirmModal";
 import SortableTh from "../components/SortableTh";
 import { useSortableData } from "../hooks/useSortableData";
 import { exportToCsv } from "../utils/exportCsv";
 
-const STATUS_OPTIONS = ["all", "active", "cancelled"];
+const STATUS_OPTIONS = ["all", "active", "completed", "cancelled"];
 
 export default function Orders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [expandedOrder, setExpandedOrder] = useState(null);
-  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [cancelTarget, setCancelTarget] = useState(null);
+  const [completeTarget, setCompleteTarget] = useState(null);
   const [statusFilter, setStatusFilter] = useState("all");
 
   function load() {
@@ -30,8 +33,9 @@ export default function Orders() {
 
   const { sorted, sort, requestSort } = useSortableData(filtered, "id", "desc");
 
-  const totalRevenue = orders.reduce((s, o) => s + parseFloat(o.total_amount), 0);
-  const filteredRevenue = filtered.reduce((s, o) => s + parseFloat(o.total_amount), 0);
+  const completedRevenue = orders
+    .filter((o) => o.status === "completed")
+    .reduce((s, o) => s + parseFloat(o.total_amount), 0);
 
   async function handleCreate(data) {
     setLoading(true);
@@ -47,15 +51,27 @@ export default function Orders() {
     }
   }
 
-  async function handleDelete() {
+  async function handleCancel() {
     try {
-      await deleteOrder(deleteTarget.id);
+      await cancelOrder(cancelTarget.id);
       toast.success("Order cancelled — stock restored");
-      setDeleteTarget(null);
+      setCancelTarget(null);
       load();
     } catch (err) {
       toast.error(err.response?.data?.detail || "Failed to cancel order");
-      setDeleteTarget(null);
+      setCancelTarget(null);
+    }
+  }
+
+  async function handleComplete() {
+    try {
+      await completeOrder(completeTarget.id);
+      toast.success("Order marked as completed");
+      setCompleteTarget(null);
+      load();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || "Failed to complete order");
+      setCompleteTarget(null);
     }
   }
 
@@ -78,20 +94,19 @@ export default function Orders() {
         <div className="page-title">
           <h1>Orders</h1>
           <p className="page-subtitle">
-            {orders.length} order{orders.length !== 1 ? "s" : ""} · Total revenue ${totalRevenue.toFixed(2)}
+            {orders.length} order{orders.length !== 1 ? "s" : ""} · Revenue earned ${completedRevenue.toFixed(2)}
           </p>
         </div>
-        <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
-          <button className="btn btn-secondary" onClick={handleExport}>⬇ Export CSV</button>
+        <div className="page-actions">
+          <button className="btn btn-secondary" onClick={handleExport}><Download size={15} /> Export CSV</button>
           <button className="btn btn-primary btn-lg" onClick={() => setShowForm((v) => !v)}>
-            {showForm ? "✕ Close" : "+ New Order"}
+            {showForm ? <><X size={15} /> Close</> : "+ New Order"}
           </button>
         </div>
       </div>
 
       {showForm && <OrderForm onSubmit={handleCreate} loading={loading} />}
 
-      {/* Status filter tabs */}
       <div className="filter-tabs">
         {STATUS_OPTIONS.map((s) => (
           <button
@@ -105,17 +120,12 @@ export default function Orders() {
             </span>
           </button>
         ))}
-        {statusFilter !== "all" && (
-          <span className="filter-revenue">
-            Filtered revenue: ${filteredRevenue.toFixed(2)}
-          </span>
-        )}
       </div>
 
       {sorted.length === 0 ? (
         <div className="table-wrapper">
           <div className="empty-state">
-            <div className="empty-state-icon">🧾</div>
+            <div className="empty-state-svg"><FileText size={36} /></div>
             <p>{statusFilter !== "all" ? `No ${statusFilter} orders` : "No orders yet"}</p>
           </div>
         </div>
@@ -124,7 +134,7 @@ export default function Orders() {
           <table className="data-table">
             <thead>
               <tr>
-                <SortableTh label="Order #"  sortKey="id"           sort={sort} onSort={requestSort} />
+                <SortableTh label="Order #"  sortKey="id"            sort={sort} onSort={requestSort} />
                 <SortableTh label="Customer" sortKey="customer_name" sort={sort} onSort={requestSort} />
                 <th>Items</th>
                 <SortableTh label="Total"    sortKey="total_amount"  sort={sort} onSort={requestSort} />
@@ -135,17 +145,12 @@ export default function Orders() {
             </thead>
             <tbody>
               {sorted.map((o) => (
-                <>
-                  <tr key={o.id}>
-                    <td style={{ fontWeight: 700, color: "var(--indigo-600)" }}>#{o.id}</td>
+                <React.Fragment key={o.id}>
+                  <tr>
+                    <td className="td-id-accent">#{o.id}</td>
                     <td>
-                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                        <div style={{
-                          width: 28, height: 28, borderRadius: "50%",
-                          background: "linear-gradient(135deg, var(--emerald-500), var(--sky-500))",
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                          color: "#fff", fontWeight: 700, fontSize: "0.75rem", flexShrink: 0
-                        }}>
+                      <div className="td-name-cell">
+                        <div className="avatar avatar-sm avatar-orders">
                           {o.customer_name.charAt(0).toUpperCase()}
                         </div>
                         {o.customer_name}
@@ -154,19 +159,38 @@ export default function Orders() {
                     <td><span className="badge">{o.items.length} item{o.items.length !== 1 ? "s" : ""}</span></td>
                     <td><span className="price-large">${parseFloat(o.total_amount).toFixed(2)}</span></td>
                     <td><span className={`status-badge status-${o.status}`}>{o.status}</span></td>
-                    <td style={{ color: "var(--navy-400)" }}>{new Date(o.created_at).toLocaleDateString()}</td>
-                    <td className="action-cell">
-                      <button
-                        className="btn btn-sm btn-secondary"
-                        onClick={() => setExpandedOrder(expandedOrder === o.id ? null : o.id)}
-                      >
-                        {expandedOrder === o.id ? "▲ Hide" : "▼ Details"}
-                      </button>
-                      <button className="btn btn-sm btn-danger" onClick={() => setDeleteTarget(o)}>Cancel</button>
+                    <td className="td-date">{new Date(o.created_at).toLocaleDateString()}</td>
+                    <td>
+                      <div className="action-cell">
+                        <button
+                          className="btn btn-sm btn-secondary"
+                          onClick={() => setExpandedOrder(expandedOrder === o.id ? null : o.id)}
+                        >
+                          {expandedOrder === o.id
+                            ? <><ChevronUp size={14} /> Hide</>
+                            : <><ChevronDown size={14} /> Details</>}
+                        </button>
+                        {o.status === "active" && (
+                          <>
+                            <button
+                              className="btn btn-sm btn-success"
+                              onClick={() => setCompleteTarget(o)}
+                            >
+                              <CheckCircle2 size={14} /> Complete
+                            </button>
+                            <button
+                              className="btn btn-sm btn-danger"
+                              onClick={() => setCancelTarget(o)}
+                            >
+                              Cancel
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                   {expandedOrder === o.id && (
-                    <tr key={`details-${o.id}`} className="order-detail-row">
+                    <tr className="order-detail-row">
                       <td colSpan={7}>
                         <table className="inner-table">
                           <thead>
@@ -186,7 +210,7 @@ export default function Orders() {
                       </td>
                     </tr>
                   )}
-                </>
+                </React.Fragment>
               ))}
             </tbody>
           </table>
@@ -196,12 +220,21 @@ export default function Orders() {
         </div>
       )}
 
-      {deleteTarget && (
+      {cancelTarget && (
         <ConfirmModal
           title="Cancel Order"
-          message={`Cancel order #${deleteTarget.id} for ${deleteTarget.customer_name}? All stock will be restored to inventory.`}
-          onConfirm={handleDelete}
-          onCancel={() => setDeleteTarget(null)}
+          message={`Cancel order #${cancelTarget.id} for ${cancelTarget.customer_name}? All stock will be restored to inventory.`}
+          onConfirm={handleCancel}
+          onCancel={() => setCancelTarget(null)}
+        />
+      )}
+
+      {completeTarget && (
+        <ConfirmModal
+          title="Complete Order"
+          message={`Mark order #${completeTarget.id} for ${completeTarget.customer_name} as completed? This will count toward total revenue and cannot be undone.`}
+          onConfirm={handleComplete}
+          onCancel={() => setCompleteTarget(null)}
         />
       )}
     </div>

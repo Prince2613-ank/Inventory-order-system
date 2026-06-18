@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { AlertCircle, ShoppingCart, Plus, X } from "lucide-react";
 import { getCustomers, getProducts } from "../services/api";
 
 export default function OrderForm({ onSubmit, loading }) {
@@ -57,11 +58,13 @@ export default function OrderForm({ onSubmit, loading }) {
     });
   }
 
-  if (fetchError) return <div className="error-banner">⚠ {fetchError}</div>;
+  if (fetchError) return (
+    <div className="error-banner"><AlertCircle size={16} /> {fetchError}</div>
+  );
 
   return (
     <form className="form-card" onSubmit={handleSubmit} noValidate>
-      <div className="form-card-title">🧾 Place New Order</div>
+      <div className="form-card-title"><ShoppingCart size={15} /> Place New Order</div>
 
       <div className="form-group">
         <label>Customer</label>
@@ -74,15 +77,15 @@ export default function OrderForm({ onSubmit, loading }) {
             <option key={c.id} value={c.id}>{c.full_name} · {c.email}</option>
           ))}
         </select>
-        {errors.customerId && <span className="field-error">⚠ {errors.customerId}</span>}
+        {errors.customerId && <span className="field-error"><AlertCircle size={13} /> {errors.customerId}</span>}
       </div>
 
       <div>
-        <div className="section-label" style={{ marginBottom: "0.6rem" }}>Order Items</div>
+        <div className="section-label order-items-label">Order Items</div>
         <div className="order-items-container">
           {items.map((item, index) => (
             <div key={index} className="order-item-row">
-              <div className="form-group" style={{ flex: 3 }}>
+              <div className="form-group order-item-product">
                 <select
                   value={item.product_id}
                   onChange={(e) => handleItemChange(index, "product_id", e.target.value)}
@@ -90,15 +93,15 @@ export default function OrderForm({ onSubmit, loading }) {
                   <option value="">— select product —</option>
                   {products.map((p) => (
                     <option key={p.id} value={p.id} disabled={p.quantity_in_stock === 0}>
-                      {p.name} (SKU: {p.sku}) — ${parseFloat(p.price).toFixed(2)} | Stock: {p.quantity_in_stock}{p.quantity_in_stock === 0 ? " ⛔" : ""}
+                      {p.name} (SKU: {p.sku}) — ${parseFloat(p.price).toFixed(2)} | Stock: {p.quantity_in_stock}{p.quantity_in_stock === 0 ? " (out)" : ""}
                     </option>
                   ))}
                 </select>
                 {errors[`item_${index}_product_id`] && (
-                  <span className="field-error">⚠ {errors[`item_${index}_product_id`]}</span>
+                  <span className="field-error"><AlertCircle size={13} /> {errors[`item_${index}_product_id`]}</span>
                 )}
               </div>
-              <div className="form-group" style={{ flex: 1, minWidth: "80px" }}>
+              <div className="form-group order-item-qty">
                 <input
                   type="number"
                   min="1"
@@ -107,25 +110,24 @@ export default function OrderForm({ onSubmit, loading }) {
                   placeholder="Qty"
                 />
                 {errors[`item_${index}_quantity`] && (
-                  <span className="field-error">⚠ {errors[`item_${index}_quantity`]}</span>
+                  <span className="field-error"><AlertCircle size={13} /> {errors[`item_${index}_quantity`]}</span>
                 )}
               </div>
               {items.length > 1 && (
                 <button
-                  className="btn btn-sm btn-danger"
+                  className="btn btn-sm btn-danger order-item-remove"
                   type="button"
                   onClick={() => removeItem(index)}
-                  style={{ alignSelf: "center", marginTop: "0.1rem" }}
                 >
-                  ✕
+                  <X size={14} />
                 </button>
               )}
             </div>
           ))}
         </div>
-        {errors.duplicates && <span className="field-error" style={{ marginTop: "0.4rem" }}>⚠ {errors.duplicates}</span>}
+        {errors.duplicates && <span className="field-error"><AlertCircle size={13} /> {errors.duplicates}</span>}
         <button className="btn btn-secondary btn-sm" type="button" onClick={addItem} style={{ marginTop: "0.6rem" }}>
-          + Add Another Product
+          <Plus size={14} /> Add Another Product
         </button>
       </div>
 
@@ -136,7 +138,7 @@ export default function OrderForm({ onSubmit, loading }) {
 
       <div className="form-actions">
         <button className="btn btn-success btn-lg" type="submit" disabled={loading}>
-          {loading ? "Placing Order…" : "✓ Place Order"}
+          {loading ? "Placing Order…" : "Place Order"}
         </button>
       </div>
     </form>

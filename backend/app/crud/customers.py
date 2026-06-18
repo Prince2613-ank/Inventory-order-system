@@ -28,11 +28,16 @@ def create_customer(db: Session, payload: schemas.CustomerCreate) -> models.Cust
     try:
         db.commit()
         db.refresh(customer)
-    except IntegrityError:
+    except IntegrityError as exc:
         db.rollback()
+        if "uq_customers_email" in str(exc.orig):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"A customer with email '{payload.email}' already exists",
+            )
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=f"A customer with email '{payload.email}' already exists",
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Customer could not be created because of a database constraint",
         )
     return customer
 
