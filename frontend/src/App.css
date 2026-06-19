@@ -383,11 +383,14 @@ a { color: inherit; text-decoration: none; }
   border-radius: var(--radius-lg);
   border: 1px solid rgba(226,232,240,.8);
   box-shadow: var(--shadow-sm);
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .data-table {
   width: 100%;
+  min-width: 520px;
   border-collapse: collapse;
 }
 
@@ -1161,6 +1164,26 @@ a { color: inherit; text-decoration: none; }
   .page-header { flex-direction: column; align-items: flex-start; }
   .order-item-row { flex-direction: column; }
   .modal { padding: 1.5rem; }
+  .action-cell { flex-wrap: wrap; gap: 0.3rem; }
+  .page-actions { width: 100%; justify-content: stretch; }
+  .page-actions .btn { flex: 1; min-width: 120px; justify-content: center; }
+}
+
+@media (max-width: 480px) {
+  .col-hide-xs { display: none !important; }
+  .main-content { padding: 1rem 0.75rem; }
+  .search-bar { min-width: unset; max-width: 100%; }
+  .search-bar-wrapper { flex-direction: column; align-items: stretch; }
+  .data-table th, .data-table td { padding: 0.55rem 0.65rem; font-size: 0.8rem; }
+  .btn-sm { padding: 0.28rem 0.55rem; font-size: 0.75rem; }
+  .action-cell { flex-direction: column; align-items: stretch; }
+  .action-cell .btn { text-align: center; justify-content: center; }
+  .price-large { font-size: 0.95rem; }
+  .sku-chip { font-size: 0.7rem; padding: 0.1rem 0.4rem; }
+  .status-badge { font-size: 0.7rem; padding: 0.2rem 0.55rem; }
+  .badge { font-size: 0.68rem; padding: 0.15rem 0.5rem; }
+  .filter-tabs { gap: 0.3rem; }
+  .filter-tab { padding: 0.35rem 0.65rem; font-size: 0.78rem; }
 }
 
 /* AVATARS */

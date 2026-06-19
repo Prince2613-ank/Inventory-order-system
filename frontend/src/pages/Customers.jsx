@@ -109,18 +109,18 @@ export default function Customers() {
           <table className="data-table">
             <thead>
               <tr>
-                <SortableTh label="#"      sortKey="id"         sort={sort} onSort={requestSort} />
+                <SortableTh label="#"      sortKey="id"         sort={sort} onSort={requestSort} className="col-hide-xs" />
                 <SortableTh label="Name"   sortKey="full_name"  sort={sort} onSort={requestSort} />
                 <SortableTh label="Email"  sortKey="email"      sort={sort} onSort={requestSort} />
-                <th>Phone</th>
-                <SortableTh label="Joined" sortKey="created_at" sort={sort} onSort={requestSort} />
+                <th className="col-hide-xs">Phone</th>
+                <SortableTh label="Joined" sortKey="created_at" sort={sort} onSort={requestSort} className="col-hide-xs" />
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {sorted.map((c) => (
                 <tr key={c.id}>
-                  <td className="td-id">{c.id}</td>
+                  <td className="td-id col-hide-xs">{c.id}</td>
                   <td>
                     <div className="td-name-cell">
                       <div className="avatar">{c.full_name.charAt(0).toUpperCase()}</div>
@@ -128,8 +128,8 @@ export default function Customers() {
                     </div>
                   </td>
                   <td className="td-email">{c.email}</td>
-                  <td>{c.phone || <span className="td-muted">—</span>}</td>
-                  <td className="td-date">{new Date(c.created_at).toLocaleDateString()}</td>
+                  <td className="col-hide-xs">{c.phone || <span className="td-muted">—</span>}</td>
+                  <td className="td-date col-hide-xs">{new Date(c.created_at).toLocaleDateString()}</td>
                   <td>
                     <div className="action-cell">
                       <button className="btn btn-sm btn-danger" onClick={() => setDeleteTarget(c)}>Delete</button>

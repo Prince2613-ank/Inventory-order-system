@@ -136,10 +136,10 @@ export default function Orders() {
               <tr>
                 <SortableTh label="Order #"  sortKey="id"            sort={sort} onSort={requestSort} />
                 <SortableTh label="Customer" sortKey="customer_name" sort={sort} onSort={requestSort} />
-                <th>Items</th>
+                <th className="col-hide-xs">Items</th>
                 <SortableTh label="Total"    sortKey="total_amount"  sort={sort} onSort={requestSort} />
                 <th>Status</th>
-                <SortableTh label="Date"     sortKey="created_at"    sort={sort} onSort={requestSort} />
+                <SortableTh label="Date"     sortKey="created_at"    sort={sort} onSort={requestSort} className="col-hide-xs" />
                 <th>Actions</th>
               </tr>
             </thead>
@@ -156,10 +156,10 @@ export default function Orders() {
                         {o.customer_name}
                       </div>
                     </td>
-                    <td><span className="badge">{o.items.length} item{o.items.length !== 1 ? "s" : ""}</span></td>
+                    <td className="col-hide-xs"><span className="badge">{o.items.length} item{o.items.length !== 1 ? "s" : ""}</span></td>
                     <td><span className="price-large">${parseFloat(o.total_amount).toFixed(2)}</span></td>
                     <td><span className={`status-badge status-${o.status}`}>{o.status}</span></td>
-                    <td className="td-date">{new Date(o.created_at).toLocaleDateString()}</td>
+                    <td className="td-date col-hide-xs">{new Date(o.created_at).toLocaleDateString()}</td>
                     <td>
                       <div className="action-cell">
                         <button

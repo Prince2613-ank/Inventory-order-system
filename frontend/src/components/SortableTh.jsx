@@ -1,10 +1,10 @@
 import { ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 
-export default function SortableTh({ label, sortKey, sort, onSort }) {
+export default function SortableTh({ label, sortKey, sort, onSort, className = "" }) {
   const active = sort.key === sortKey;
   return (
     <th
-      className={`sortable-th ${active ? "sort-active" : ""}`}
+      className={`sortable-th ${active ? "sort-active" : ""} ${className}`}
       onClick={() => onSort(sortKey)}
       aria-sort={active ? (sort.dir === "asc" ? "ascending" : "descending") : "none"}
     >

@@ -135,7 +135,7 @@ export default function Products() {
           <table className="data-table">
             <thead>
               <tr>
-                <SortableTh label="#"            sortKey="id"               sort={sort} onSort={requestSort} />
+                <SortableTh label="#"            sortKey="id"               sort={sort} onSort={requestSort} className="col-hide-xs" />
                 <SortableTh label="Product Name" sortKey="name"             sort={sort} onSort={requestSort} />
                 <SortableTh label="SKU"          sortKey="sku"              sort={sort} onSort={requestSort} />
                 <SortableTh label="Price"        sortKey="price"            sort={sort} onSort={requestSort} />
@@ -147,7 +147,7 @@ export default function Products() {
               {sorted.map((p) => (
                 <React.Fragment key={p.id}>
                   <tr className={p.quantity_in_stock === 0 ? "row-danger" : p.quantity_in_stock < 10 ? "row-warning" : ""}>
-                    <td className="td-id">{p.id}</td>
+                    <td className="td-id col-hide-xs">{p.id}</td>
                     <td><strong>{p.name}</strong></td>
                     <td><span className="sku-chip">{p.sku}</span></td>
                     <td><span className="price">${parseFloat(p.price).toFixed(2)}</span></td>
