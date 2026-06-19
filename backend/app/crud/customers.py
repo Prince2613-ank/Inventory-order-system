@@ -45,4 +45,11 @@ def create_customer(db: Session, payload: schemas.CustomerCreate) -> models.Cust
 def delete_customer(db: Session, customer_id: int) -> None:
     customer = get_customer(db, customer_id)
     db.delete(customer)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Cannot delete this customer because they have existing orders. Cancel or delete those orders first.",
+        )

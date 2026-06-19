@@ -95,4 +95,11 @@ def update_product(db: Session, product_id: int, payload: schemas.ProductUpdate)
 def delete_product(db: Session, product_id: int) -> None:
     product = get_product(db, product_id)
     db.delete(product)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Cannot delete this product because it is referenced by existing orders. Cancel or delete those orders first.",
+        )
